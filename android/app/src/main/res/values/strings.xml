@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Secure PWA Kiosk</string>
+    <string name="device_owner_description">Secure PWA Kiosk Device Owner</string>
+
+    <!-- Provisioned ค่าแทนที่จะฝังคีย์จริงไว้ในโค้ด -->
+    <string name="config_pwa_url" translatable="false">https://pwa.example.com</string>
+    <string name="config_supabase_url" translatable="false">https://YOUR_PROJECT.supabase.co</string>
+    <string name="config_supabase_location_endpoint" translatable="false">/rest/v1/rpc/save_device_location</string>
+    <string name="config_supabase_status_endpoint" translatable="false">/rest/v1/rpc/save_device_status</string>
+    <string name="config_supabase_api_key" translatable="false">__PROVISIONED_AT_RUNTIME__</string>
+    <string name="config_notification_channel_name">Secure Kiosk Service</string>
+    <string name="config_notification_channel_desc">ช่องสำหรับแสดงสถานะการส่งข้อมูลตำแหน่ง</string>
+    <string name="config_notification_title">Secure Kiosk กำลังทำงาน</string>
+    <string name="config_notification_text">ระบบกำลังส่งตำแหน่งและสถานะอุปกรณ์</string>
+</resources>

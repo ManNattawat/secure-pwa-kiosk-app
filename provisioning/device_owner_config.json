@@ -1,0 +1,25 @@
+{
+  "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.gse.securekiosk/.deviceadmin.ProvisioningAdminReceiver",
+  "android.app.extra.PROVISIONING_SKIP_ENCRYPTION": false,
+  "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": false,
+  "android.app.extra.PROVISIONING_WIFI_SSID": "OPPO Reno11 5G Man",
+  "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE": "WPA3",
+  "android.app.extra.PROVISIONING_WIFI_PASSWORD": "14041986",
+  "android.app.extra.PROVISIONING_LANGUAGE": "th_TH",
+  "android.app.extra.PROVISIONING_TIME_ZONE": "Asia/Bangkok",
+  "android.app.extra.PROVISIONING_DEVICE_OWNER_COMPONENT_NAME": "com.gse.securekiosk/.deviceadmin.DeviceOwnerReceiver",
+  "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
+    "pwa_url": "https://gse-enterprise-platform.pages.dev",
+    "supabase_base_url": "https://cifnlfayusnkpnamelga.supabase.co",
+    "supabase_service_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpZm5sZmF5dXNua3BuYW1lbGdhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mzk0NzgyOCwiZXhwIjoyMDY5NTIzODI4fQ.A6Q0FkLgicpbfO50oEH3mlpBCOclm8E7-DZ6eMrEoLY",
+    "certificate_pins": [
+      "62:C2:A5:93:8C:4A:C0:6D:6B:D7:9D:1F:20:10:BF:0B:6A:61:18:4D:0F:B0:C6:A5:BC:E5:A3:44:2C:29:D9:DD"
+    ],
+    "certificate_pin": "62:C2:A5:93:8C:4A:C0:6D:6B:D7:9D:1F:20:10:BF:0B:6A:61:18:4D:0F:B0:C6:A5:BC:E5:A3:44:2C:29:D9:DD",
+    "lock_task_packages": [
+      "com.gse.securekiosk"
+    ]
+  },
+  "android.app.extra.PROVISIONING_KEEP_SCREEN_ON": true,
+  "android.app.extra.PROVISIONING_USE_MOBILE_DATA": true
+}

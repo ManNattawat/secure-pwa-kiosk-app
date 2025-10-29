@@ -1,0 +1,82 @@
+name: Android CI
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: read
+
+    env:
+      JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
+      ANDROID_COMPILE_SDK: "34"
+      ANDROID_BUILD_TOOLS: "34.0.0"
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+      SECURE_KIOSK_SUPABASE_URL: ${{ secrets.SECURE_KIOSK_SUPABASE_URL }}
+      SECURE_KIOSK_SUPABASE_KEY: ${{ secrets.SECURE_KIOSK_SUPABASE_KEY }}
+      SECURE_KIOSK_PWA_URL: ${{ secrets.SECURE_KIOSK_PWA_URL }}
+      SECURE_KIOSK_CERT_PINS: ${{ secrets.SECURE_KIOSK_CERT_PINS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Download Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: ${{ env.ANDROID_COMPILE_SDK }}
+          build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
+          cmake: ""
+          ndk: ""
+
+      - name: Inject secrets into config
+        shell: bash
+        working-directory: android/app
+        run: |
+          sed -i "s#https://YOUR_PROJECT.supabase.co#${SECURE_KIOSK_SUPABASE_URL}#g" src/main/res/values/strings.xml
+          sed -i "s#https://pwa.example.com#${SECURE_KIOSK_PWA_URL}#g" src/main/res/values/strings.xml
+          python3 ../../scripts/update_device_config.py
+
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
+        working-directory: android
+
+      - name: Build Debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Archive APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-pwa-kiosk-apk
+          path: |
+            android/app/build/outputs/apk/**/app-*.apk
