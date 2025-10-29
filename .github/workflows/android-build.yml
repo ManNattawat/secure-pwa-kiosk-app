@@ -46,13 +46,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Download Android SDK
+      - name: Download Android SDK tools
         uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platforms;android-${{ env.ANDROID_COMPILE_SDK }}
-            build-tools;${{ env.ANDROID_BUILD_TOOLS }}
-            platform-tools
+
+      - name: Install Android packages
+        run: |
+          yes | sdkmanager "platforms;android-${{ env.ANDROID_COMPILE_SDK }}" "build-tools;${{ env.ANDROID_BUILD_TOOLS }}" "platform-tools"
 
       - name: Inject secrets into config
         shell: bash
