@@ -1,5 +1,6 @@
 package com.gse.securekiosk
 
+import android.app.Activity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -12,35 +13,29 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import com.gse.securekiosk.databinding.ActivityMainBinding
 import com.gse.securekiosk.kiosk.KioskManager
 import com.gse.securekiosk.location.LocationSyncService
 import com.gse.securekiosk.util.DeviceConfig
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var webView: WebView
     private lateinit var kioskManager: KioskManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE
         )
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_main)
 
         kioskManager = KioskManager(this)
 
-        setupBackNavigation()
-        configureWebView(binding.kioskWebView)
-        binding.kioskWebView.loadUrl(DeviceConfig.getPwaUrl(this))
+        webView = findViewById(R.id.kioskWebView)
+        configureWebView(webView)
+        webView.loadUrl(DeviceConfig.getPwaUrl(this))
 
         startLocationService()
     }
@@ -61,12 +56,6 @@ class MainActivity : AppCompatActivity() {
     private fun startLocationService() {
         val intent = Intent(this, LocationSyncService::class.java)
         startForegroundService(intent)
-    }
-
-    private fun setupBackNavigation() {
-        onBackPressedDispatcher.addCallback(this) {
-            // no-op to block back navigation
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

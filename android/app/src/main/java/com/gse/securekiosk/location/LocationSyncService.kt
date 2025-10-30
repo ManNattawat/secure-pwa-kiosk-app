@@ -11,11 +11,8 @@ import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import kotlinx.coroutines.GlobalScope
 import com.gse.securekiosk.MainActivity
 import com.gse.securekiosk.R
 import com.gse.securekiosk.supabase.SupabaseClient
@@ -24,7 +21,7 @@ import com.google.android.gms.location.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class LocationSyncService : LifecycleService() {
+class LocationSyncService : Service() {
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(this)
@@ -49,7 +46,7 @@ class LocationSyncService : LifecycleService() {
         super.onCreate()
         startForeground(NOTIFICATION_ID, buildNotification())
         requestLocationUpdates()
-        schedulePeriodicStatusUpload()
+        // schedulePeriodicStatusUpload()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -62,7 +59,6 @@ class LocationSyncService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        super.onBind(intent)
         return null
     }
 
@@ -76,7 +72,7 @@ class LocationSyncService : LifecycleService() {
 
     private fun sendLocation(location: Location) {
         val deviceId = DeviceConfig.getDeviceId(this)
-        lifecycleScope.launch {
+        GlobalScope.launch {
             SupabaseClient(this@LocationSyncService).sendLocation(
                 deviceId = deviceId,
                 latitude = location.latitude,
@@ -89,16 +85,16 @@ class LocationSyncService : LifecycleService() {
         }
     }
 
-    private fun schedulePeriodicStatusUpload() {
-        val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(15, TimeUnit.MINUTES)
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            UNIQUE_WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
-    }
+    // private fun schedulePeriodicStatusUpload() {
+    //     val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(15, TimeUnit.MINUTES)
+    //         .build()
+    //
+    //     WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+    //         UNIQUE_WORK_NAME,
+    //         ExistingPeriodicWorkPolicy.UPDATE,
+    //         workRequest
+    //     )
+    // }
 
     private fun buildNotification(): Notification {
         val channelId = createNotificationChannel()

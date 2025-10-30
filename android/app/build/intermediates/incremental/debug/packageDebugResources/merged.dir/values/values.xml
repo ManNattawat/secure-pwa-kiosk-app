@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <attr format="reference" name="cardViewStyle"/>
+    <color name="background">#000000</color>
+    <color name="cardview_dark_background">#FF424242</color>
+    <color name="cardview_light_background">#FFFFFFFF</color>
+    <color name="cardview_shadow_end_color">#03000000</color>
+    <color name="cardview_shadow_start_color">#37000000</color>
+    <color name="ic_launcher_background">#0A84FF</color>
+    <color name="on_background">#ffffff</color>
+    <color name="on_primary">#ffffff</color>
+    <color name="on_secondary">#ffffff</color>
+    <color name="on_surface">#ffffff</color>
+    <color name="primary">#0A84FF</color>
+    <color name="primary_dark">#0060DF</color>
+    <color name="primary_variant">#409CFF</color>
+    <color name="secondary">#FF9500</color>
+    <color name="surface">#111111</color>
+    <dimen name="cardview_compat_inset_shadow">1dp</dimen>
+    <dimen name="cardview_default_elevation">2dp</dimen>
+    <dimen name="cardview_default_radius">2dp</dimen>
+    <string name="app_name">Secure PWA Kiosk</string>
+    <string name="config_notification_channel_desc">ช่องสำหรับแสดงสถานะการส่งข้อมูลตำแหน่ง</string>
+    <string name="config_notification_channel_name">Secure Kiosk Service</string>
+    <string name="config_notification_text">ระบบกำลังส่งตำแหน่งและสถานะอุปกรณ์</string>
+    <string name="config_notification_title">Secure Kiosk กำลังทำงาน</string>
+    <string name="config_pwa_url" translatable="false">https://pwa.example.com</string>
+    <string name="config_supabase_api_key" translatable="false">__PROVISIONED_AT_RUNTIME__</string>
+    <string name="config_supabase_location_endpoint" translatable="false">/rest/v1/rpc/save_device_location</string>
+    <string name="config_supabase_status_endpoint" translatable="false">/rest/v1/rpc/save_device_status</string>
+    <string name="config_supabase_url" translatable="false">https://YOUR_PROJECT.supabase.co</string>
+    <string name="device_owner_description">Secure PWA Kiosk Device Owner</string>
+    <style name="Base.CardView" parent="android:Widget">
+        <item name="cardCornerRadius">@dimen/cardview_default_radius</item>
+        <item name="cardElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardMaxElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardUseCompatPadding">false</item>
+        <item name="cardPreventCornerOverlap">true</item>
+    </style>
+    <style name="CardView" parent="Base.CardView">
+    </style>
+    <style name="CardView.Dark">
+        <item name="cardBackgroundColor">@color/cardview_dark_background</item>
+    </style>
+    <style name="CardView.Light">
+        <item name="cardBackgroundColor">@color/cardview_light_background</item>
+    </style>
+    <style name="Theme" parent="android:Theme">
+    </style>
+    <style name="Theme.SecurePwaKiosk" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" ns1:targetApi="o_mr1">false</item>
+    </style>
+    <style name="Theme.WithCardViewFallback">
+        <item name="cardViewStyle">@style/Widget.CardView</item>
+    </style>
+    <style name="Widget.CardView" parent="android:Widget">
+        <item name="cardBackgroundColor">@android:color/transparent</item>
+        <item name="cardCornerRadius">0dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardMaxElevation">0dp</item>
+        <item name="cardUseCompatPadding">false</item>
+        <item name="cardPreventCornerOverlap">false</item>
+        <item name="contentPadding">0dp</item>
+        <item name="contentPaddingLeft">0dp</item>
+        <item name="contentPaddingTop">0dp</item>
+        <item name="contentPaddingRight">0dp</item>
+        <item name="contentPaddingBottom">0dp</item>
+    </style>
+    <declare-styleable name="CardView">
+        <attr format="color|reference" name="cardBackgroundColor"/>
+        <attr format="dimension" name="cardCornerRadius"/>
+        <attr format="dimension" name="cardElevation"/>
+        <attr format="dimension" name="cardMaxElevation"/>
+        <attr format="boolean" name="cardUseCompatPadding"/>
+        <attr format="boolean" name="cardPreventCornerOverlap"/>
+        <attr format="dimension" name="contentPadding"/>
+        <attr format="dimension" name="contentPaddingLeft"/>
+        <attr format="dimension" name="contentPaddingTop"/>
+        <attr format="dimension" name="contentPaddingRight"/>
+        <attr format="dimension" name="contentPaddingBottom"/>
+        <attr name="android:minWidth"/>
+        <attr name="android:minHeight"/>
+    </declare-styleable>
+</resources>

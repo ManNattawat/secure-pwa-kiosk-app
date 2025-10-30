@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr format="reference" name="cardViewStyle"/>
+    <bool name="gse_cardview_placeholder">true</bool>
+    <color name="cardview_dark_background">#FF424242</color>
+    <color name="cardview_light_background">#FFFFFFFF</color>
+    <color name="cardview_shadow_end_color">#03000000</color>
+    <color name="cardview_shadow_start_color">#37000000</color>
+    <dimen name="cardview_compat_inset_shadow">0dp</dimen>
+    <dimen name="cardview_default_elevation">0dp</dimen>
+    <dimen name="cardview_default_radius">0dp</dimen>
+    <string name="gse_cardview_marker">gse-compat</string>
+    <style name="Base.CardView" parent="android:Widget">
+        <item name="cardCornerRadius">@dimen/cardview_default_radius</item>
+        <item name="cardElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardMaxElevation">@dimen/cardview_default_elevation</item>
+        <item name="cardUseCompatPadding">false</item>
+        <item name="cardPreventCornerOverlap">true</item>
+    </style>
+    <style name="CardView" parent="Base.CardView">
+    </style>
+    <style name="CardView.Dark">
+        <item name="cardBackgroundColor">@color/cardview_dark_background</item>
+    </style>
+    <style name="CardView.Light">
+        <item name="cardBackgroundColor">@color/cardview_light_background</item>
+    </style>
+    <style name="Theme" parent="android:Theme">
+    </style>
+    <style name="Theme.WithCardViewFallback">
+        <item name="cardViewStyle">@style/Widget.CardView</item>
+    </style>
+    <style name="Widget.CardView" parent="android:Widget">
+        <item name="cardBackgroundColor">@android:color/transparent</item>
+        <item name="cardCornerRadius">0dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardMaxElevation">0dp</item>
+        <item name="cardUseCompatPadding">false</item>
+        <item name="cardPreventCornerOverlap">false</item>
+        <item name="contentPadding">0dp</item>
+        <item name="contentPaddingLeft">0dp</item>
+        <item name="contentPaddingTop">0dp</item>
+        <item name="contentPaddingRight">0dp</item>
+        <item name="contentPaddingBottom">0dp</item>
+    </style>
+    <declare-styleable name="CardView">
+        <attr format="color|reference" name="cardBackgroundColor"/>
+        <attr format="dimension" name="cardCornerRadius"/>
+        <attr format="dimension" name="cardElevation"/>
+        <attr format="dimension" name="cardMaxElevation"/>
+        <attr format="boolean" name="cardUseCompatPadding"/>
+        <attr format="boolean" name="cardPreventCornerOverlap"/>
+        <attr format="dimension" name="contentPadding"/>
+        <attr format="dimension" name="contentPaddingLeft"/>
+        <attr format="dimension" name="contentPaddingTop"/>
+        <attr format="dimension" name="contentPaddingRight"/>
+        <attr format="dimension" name="contentPaddingBottom"/>
+        <attr name="android:minWidth"/>
+        <attr name="android:minHeight"/>
+    </declare-styleable>
+</resources>

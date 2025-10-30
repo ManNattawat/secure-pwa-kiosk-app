@@ -1,0 +1,33 @@
+com.gse.compat
+attr cardBackgroundColor
+attr cardCornerRadius
+attr cardElevation
+attr cardMaxElevation
+attr cardPreventCornerOverlap
+attr cardUseCompatPadding
+attr cardViewStyle
+attr contentPadding
+attr contentPaddingBottom
+attr contentPaddingLeft
+attr contentPaddingRight
+attr contentPaddingTop
+bool gse_cardview_placeholder
+color cardview_dark_background
+color cardview_light_background
+color cardview_shadow_end_color
+color cardview_shadow_start_color
+dimen cardview_compat_inset_shadow
+dimen cardview_default_elevation
+dimen cardview_default_radius
+interpolator fast_out_linear_in
+interpolator fast_out_slow_in
+interpolator linear_out_slow_in
+string gse_cardview_marker
+style Base_CardView
+style CardView
+style CardView_Dark
+style CardView_Light
+style Theme
+style Theme_WithCardViewFallback
+style Widget_CardView
+styleable CardView android_minHeight android_minWidth cardBackgroundColor cardCornerRadius cardElevation cardMaxElevation cardPreventCornerOverlap cardUseCompatPadding contentPadding contentPaddingBottom contentPaddingLeft contentPaddingRight contentPaddingTop

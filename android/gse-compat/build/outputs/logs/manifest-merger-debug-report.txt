@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml:2:13-83
+INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml:2:13-83
+	package
+		INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml
+	xmlns:android
+		ADDED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml:2:23-81
+uses-sdk
+INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml reason: use-sdk injection requested
+INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml
+INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml
+	android:targetSdkVersion
+		INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml
+	android:minSdkVersion
+		INJECTED from D:\projects\SecurePwaKioskApp\android\gse-compat\build\intermediates\tmp\ProcessLibraryManifest\debug\tempAndroidManifest7189074786996633136.xml
