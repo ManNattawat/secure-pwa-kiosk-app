@@ -48,6 +48,9 @@
         <item name="android:hyphenationFrequency">none</item>
         <item name="android:breakStrategy">high_quality</item>
     </style>
+    <style name="CardView" parent="Base.CardView">
+        <item name="cardBackgroundColor">?android:attr/colorBackgroundFloating</item>
+    </style>
     <style name="ThemeOverlay.Material3.AutoCompleteTextView" parent="Base.ThemeOverlay.Material3.AutoCompleteTextView">
     <item name="colorControlNormal">@color/m3_textfield_indicator_text_color</item>
   </style>

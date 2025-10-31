@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gse.securekiosk.app-mergeDebugResources-32:/values-el/values-el.xml",
+            "outputFile": "com.gse.securekiosk.app-mergeDebugResources-33:/values-el/values-el.xml",
             "map": [
                 {
                     "source": "D:\\gradle\\caches\\transforms-4\\fccadc33288723436d4686233a8d1f4a\\transformed\\jetified-play-services-basement-18.3.0\\res\\values-el\\values.xml",

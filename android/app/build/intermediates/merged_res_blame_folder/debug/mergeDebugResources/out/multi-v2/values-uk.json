@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gse.securekiosk.app-mergeDebugResources-32:/values-uk/values-uk.xml",
+            "outputFile": "com.gse.securekiosk.app-mergeDebugResources-33:/values-uk/values-uk.xml",
             "map": [
                 {
                     "source": "D:\\gradle\\caches\\transforms-4\\a3db133ffc67abbc916a23ae4b5fd453\\transformed\\core-1.13.0\\res\\values-uk\\values-uk.xml",

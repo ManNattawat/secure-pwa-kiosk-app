@@ -24,11 +24,11 @@
     <string name="config_notification_channel_name">Secure Kiosk Service</string>
     <string name="config_notification_text">ระบบกำลังส่งตำแหน่งและสถานะอุปกรณ์</string>
     <string name="config_notification_title">Secure Kiosk กำลังทำงาน</string>
-    <string name="config_pwa_url" translatable="false">https://pwa.example.com</string>
-    <string name="config_supabase_api_key" translatable="false">__PROVISIONED_AT_RUNTIME__</string>
+    <string name="config_pwa_url" translatable="false">https://gse-enterprise-platform.pages.dev</string>
+    <string name="config_supabase_api_key" translatable="false">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpZm5sZmF5dXNua3BuYW1lbGdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5NDc4MjgsImV4cCI6MjA2OTUyMzgyOH0.5Da2JLNG88DHSxv5sxmvGUcuSk8ZOgKNvwOcIoWLH-Q</string>
     <string name="config_supabase_location_endpoint" translatable="false">/rest/v1/rpc/save_device_location</string>
     <string name="config_supabase_status_endpoint" translatable="false">/rest/v1/rpc/save_device_status</string>
-    <string name="config_supabase_url" translatable="false">https://YOUR_PROJECT.supabase.co</string>
+    <string name="config_supabase_url" translatable="false">https://cifnlfayusnkpnamelga.supabase.co</string>
     <string name="device_owner_description">Secure PWA Kiosk Device Owner</string>
     <style name="Base.CardView" parent="android:Widget">
         <item name="cardCornerRadius">@dimen/cardview_default_radius</item>
