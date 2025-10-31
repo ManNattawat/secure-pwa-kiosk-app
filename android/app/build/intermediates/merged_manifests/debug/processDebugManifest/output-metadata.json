@@ -4,7 +4,7 @@
     "type": "MERGED_MANIFESTS",
     "kind": "Directory"
   },
-  "applicationId": "com.gse.securekiosk",
+  "applicationId": "com.gse.securekiosk.v2",
   "variantName": "debug",
   "elements": [
     {

@@ -1,0 +1,9 @@
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\kiosk\KioskManager.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\supabase\SupabaseClient.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\util\DevicePolicyUtils.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\MainActivity.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\location\LocationSyncService.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\boot\BootCompleteReceiver.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\deviceadmin\DeviceOwnerReceiver.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\util\DeviceConfig.kt
+D:\projects\SecurePwaKioskApp\android\app\src\main\java\com\gse\securekiosk\deviceadmin\ProvisioningAdminReceiver.kt
