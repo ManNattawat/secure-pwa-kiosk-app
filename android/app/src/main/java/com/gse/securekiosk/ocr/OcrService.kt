@@ -5,6 +5,8 @@ import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * OCR Service
@@ -112,11 +114,11 @@ object OcrService {
             json.put("fullText", fullText)
             json.put("blockCount", blockCount)
             
-            val blocksArray = org.json.JSONArray()
+            val blocksArray = JSONArray()
             blocks.forEach { block ->
                 val blockJson = JSONObject()
                 blockJson.put("text", block.text)
-                blockJson.put("lines", org.json.JSONArray(block.lines))
+                blockJson.put("lines", JSONArray(block.lines))
                 block.boundingBox?.let {
                     val boxJson = JSONObject()
                     boxJson.put("left", it.left)
@@ -125,7 +127,8 @@ object OcrService {
                     boxJson.put("bottom", it.bottom)
                     blockJson.put("boundingBox", boxJson)
                 }
-                blocksArray.put(blockJson)
+                // Fix ambiguity by explicitly casting to Any
+                blocksArray.put(blockJson as Any)
             }
             json.put("blocks", blocksArray)
             

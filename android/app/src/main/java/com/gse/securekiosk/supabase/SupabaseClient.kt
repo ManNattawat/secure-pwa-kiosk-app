@@ -165,7 +165,7 @@ class SupabaseClient(private val context: Context) {
      * Insert data to Supabase table
      */
     suspend fun insertData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
-        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val apiKey = DeviceConfig.getSupabaseApiKey(context) ?: return@withContext false
         val baseUrl = DeviceConfig.getSupabaseUrl(context)
         val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName"
         
@@ -196,13 +196,13 @@ class SupabaseClient(private val context: Context) {
      */
     suspend fun updateData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
         // Extract ID from data (assuming primary key is "id")
-        val id = data.optString("id", null)
-        if (id.isNullOrBlank()) {
+        val id = data.optString("id") ?: ""
+        if (id.isBlank()) {
             Log.e(TAG, "Update failed: no ID in data")
             return@withContext false
         }
         
-        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val apiKey = DeviceConfig.getSupabaseApiKey(context) ?: return@withContext false
         val baseUrl = DeviceConfig.getSupabaseUrl(context)
         val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName?id=eq.$id"
         
@@ -233,13 +233,13 @@ class SupabaseClient(private val context: Context) {
      */
     suspend fun deleteData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
         // Extract ID from data (assuming primary key is "id")
-        val id = data.optString("id", null)
-        if (id.isNullOrBlank()) {
+        val id = data.optString("id") ?: ""
+        if (id.isBlank()) {
             Log.e(TAG, "Delete failed: no ID in data")
             return@withContext false
         }
         
-        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val apiKey = DeviceConfig.getSupabaseApiKey(context) ?: return@withContext false
         val baseUrl = DeviceConfig.getSupabaseUrl(context)
         val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName?id=eq.$id"
         
