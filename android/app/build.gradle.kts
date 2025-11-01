@@ -5,18 +5,16 @@ plugins {
 
 android {
     namespace = "com.gse.securekiosk"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.gse.securekiosk.v2"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         
-        ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
-        }
+
     }
 
     buildTypes {
