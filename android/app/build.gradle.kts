@@ -10,9 +10,13 @@ android {
     defaultConfig {
         applicationId = "com.gse.securekiosk.v2"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0.0"
+        
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     buildTypes {
