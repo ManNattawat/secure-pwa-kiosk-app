@@ -276,15 +276,23 @@ class AndroidBridge(
      */
     private fun callJavaScriptCallback(callbackName: String, result: String) {
         webView?.post {
-            // Use JSON.stringify to properly escape the JSON string
-            // This ensures the JSON is safely passed to JavaScript
+            // Escape the JSON string properly for JavaScript
+            // Replace all backslashes, quotes, and newlines
+            val escaped = result
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+            
             val jsCode = """
                 (function() {
                     try {
                         var callback = window['$callbackName'];
                         if (typeof callback === 'function') {
-                            var result = JSON.parse('${result.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")}');
-                            callback(JSON.stringify(result));
+                            var resultJson = '$escaped';
+                            var result = JSON.parse(resultJson);
+                            callback(resultJson);
                         } else {
                             console.warn('Callback function $callbackName not found');
                         }
