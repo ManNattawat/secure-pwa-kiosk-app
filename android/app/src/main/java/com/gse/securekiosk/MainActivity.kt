@@ -130,9 +130,14 @@ class MainActivity : Activity() {
             CAMERA_PERMISSION_REQUEST_CODE -> {
                 val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
                 if (allGranted) {
-                    // Camera permission granted, notify PWA if needed
+                    // Camera permission granted - notify AndroidBridge
+                    androidBridge.onCameraPermissionGranted()
+                    // Also notify PWA if needed
                     webView.evaluateJavascript("if(window.onCameraPermissionGranted) window.onCameraPermissionGranted();", null)
                 } else {
+                    // Camera permission denied - notify AndroidBridge
+                    androidBridge.onCameraPermissionDenied()
+                    // Also notify PWA if needed
                     webView.evaluateJavascript("if(window.onCameraPermissionDenied) window.onCameraPermissionDenied();", null)
                 }
             }

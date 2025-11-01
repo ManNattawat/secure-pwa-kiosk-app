@@ -283,7 +283,7 @@ class AndroidBridge(
     @JavascriptInterface
     fun openCameraScanner(callbackName: String) {
         try {
-            if (activity == null) {
+            if (activity == null || activity !is com.gse.securekiosk.MainActivity) {
                 val errorResult = JSONObject().apply {
                     put("success", false)
                     put("error", "Activity not available")
@@ -292,6 +292,8 @@ class AndroidBridge(
                 return
             }
             
+            val mainActivity = activity as com.gse.securekiosk.MainActivity
+            
             // Check camera permission
             val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
                 context,
@@ -299,12 +301,9 @@ class AndroidBridge(
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
             
             if (!hasPermission) {
-                val errorResult = JSONObject().apply {
-                    put("success", false)
-                    put("error", "Camera permission required")
-                    put("requiresPermission", true)
-                }.toString()
-                callJavaScriptCallback(callbackName, errorResult)
+                // Request permission first
+                cameraScanCallbackName = callbackName // Store callback for after permission granted
+                mainActivity.requestCameraPermission()
                 return
             }
             
@@ -313,7 +312,7 @@ class AndroidBridge(
             
             // Open camera scanner activity
             val intent = Intent(context, CameraScannerActivity::class.java)
-            activity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+            mainActivity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
             
         } catch (e: Exception) {
             Log.e(TAG, "Error opening camera scanner", e)
@@ -323,6 +322,45 @@ class AndroidBridge(
             }.toString()
             callJavaScriptCallback(callbackName, errorResult)
         }
+    }
+    
+    /**
+     * Called after camera permission is granted
+     */
+    fun onCameraPermissionGranted() {
+        val callbackName = cameraScanCallbackName ?: return
+        
+        // Try opening camera scanner again
+        val activity = activity ?: return
+        if (activity !is com.gse.securekiosk.MainActivity) return
+        
+        try {
+            val intent = Intent(context, CameraScannerActivity::class.java)
+            activity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening camera scanner after permission granted", e)
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+            cameraScanCallbackName = null
+        }
+    }
+    
+    /**
+     * Called when camera permission is denied
+     */
+    fun onCameraPermissionDenied() {
+        val callbackName = cameraScanCallbackName ?: return
+        cameraScanCallbackName = null
+        
+        val errorResult = JSONObject().apply {
+            put("success", false)
+            put("error", "Camera permission denied")
+            put("requiresPermission", true)
+        }.toString()
+        callJavaScriptCallback(callbackName, errorResult)
     }
     
     /**
