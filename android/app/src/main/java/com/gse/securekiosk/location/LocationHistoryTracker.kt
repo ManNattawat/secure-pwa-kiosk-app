@@ -51,7 +51,7 @@ object LocationHistoryTracker {
             put("bearing", location.bearing)
             put("speed", location.speed)
             put("timestamp", location.time)
-            put("provider", location.provider)
+            put("provider", location.provider ?: "unknown")
         }
         
         historyArray.put(locationJson)
@@ -82,7 +82,7 @@ object LocationHistoryTracker {
             bearing = location.bearing.toDouble(),
             speed = location.speed.toDouble(),
             recordedAt = location.time,
-            provider = location.provider
+            provider = location.provider ?: "unknown"
         )
     }
 
