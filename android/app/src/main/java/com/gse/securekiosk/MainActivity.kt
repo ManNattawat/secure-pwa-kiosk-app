@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.gse.securekiosk.bridge.AndroidBridge
 import com.gse.securekiosk.kiosk.KioskManager
 import com.gse.securekiosk.location.LocationSyncService
 import com.gse.securekiosk.util.DeviceConfig
@@ -34,10 +35,14 @@ class MainActivity : Activity() {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 1002
         private val REQUIRED_PERMISSIONS = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.FOREGROUND_SERVICE_LOCATION
+        )
+        private val CAMERA_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA
         )
     }
 
@@ -54,6 +59,10 @@ class MainActivity : Activity() {
 
         webView = findViewById(R.id.kioskWebView)
         configureWebView(webView)
+        
+        // Add JavaScript Interface Bridge
+        webView.addJavascriptInterface(AndroidBridge(this, webView), "AndroidBridge")
+        
         webView.loadUrl(DeviceConfig.getPwaUrl(this))
 
         // Delay permission request and service start to avoid Android 15 restrictions
@@ -107,12 +116,23 @@ class MainActivity : Activity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-            if (allGranted) {
-                startLocationService()
+        when (requestCode) {
+            PERMISSION_REQUEST_CODE -> {
+                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                if (allGranted) {
+                    startLocationService()
+                }
+                // If permissions denied, service won't start (handled by service itself)
             }
-            // If permissions denied, service won't start (handled by service itself)
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                if (allGranted) {
+                    // Camera permission granted, notify PWA if needed
+                    webView.evaluateJavascript("if(window.onCameraPermissionGranted) window.onCameraPermissionGranted();", null)
+                } else {
+                    webView.evaluateJavascript("if(window.onCameraPermissionDenied) window.onCameraPermissionDenied();", null)
+                }
+            }
         }
     }
 
@@ -142,12 +162,42 @@ class MainActivity : Activity() {
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            // Allow JavaScript to access AndroidBridge
+            allowFileAccessFromFileURLs = false
+            allowUniversalAccessFromFileURLs = false
         }
 
         webView.webViewClient = SecureWebViewClient(this)
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
+                // Handle camera permission request from PWA
+                if (request?.resources?.contains(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE) == true) {
+                    requestCameraPermission()
+                    request.deny()
+                } else {
+                    request?.grant(request.resources)
+                }
+            }
+        }
 
         WebView.setWebContentsDebuggingEnabled(false)
+    }
+    
+    /**
+     * Request camera permission
+     */
+    fun requestCameraPermission() {
+        val missingPermissions = CAMERA_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        
+        if (missingPermissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                missingPermissions.toTypedArray(),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        }
     }
 
     private fun enterImmersiveMode() {
