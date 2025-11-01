@@ -57,7 +57,7 @@
             android:name="com.gse.securekiosk.scanner.CameraScannerActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            android:theme="@style/Theme.CameraScanner" />
 
         <service
             android:name="com.gse.securekiosk.location.LocationSyncService"
