@@ -15,12 +15,20 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        create("debug") {
+            // Debug signing uses default debug keystore automatically
+            // Located at: ~/.android/debug.keystore (or C:\Users\<user>\.android\debug.keystore on Windows)
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
         }
         debug {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
