@@ -310,9 +310,21 @@ class AndroidBridge(
             // Store callback name for result
             cameraScanCallbackName = callbackName
             
-            // Open camera scanner activity
-            val intent = Intent(context, CameraScannerActivity::class.java)
-            mainActivity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+            // Open camera scanner activity - run on UI thread
+            mainActivity.runOnUiThread {
+                try {
+                    val intent = Intent(context, CameraScannerActivity::class.java)
+                    mainActivity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error launching camera scanner activity", e)
+                    val errorResult = JSONObject().apply {
+                        put("success", false)
+                        put("error", e.message ?: "Failed to open camera: ${e.javaClass.simpleName}")
+                    }.toString()
+                    callJavaScriptCallback(callbackName, errorResult)
+                    cameraScanCallbackName = null
+                }
+            }
             
         } catch (e: Exception) {
             Log.e(TAG, "Error opening camera scanner", e)
@@ -321,6 +333,7 @@ class AndroidBridge(
                 put("error", e.message ?: "Unknown error")
             }.toString()
             callJavaScriptCallback(callbackName, errorResult)
+            cameraScanCallbackName = null
         }
     }
     
@@ -334,17 +347,20 @@ class AndroidBridge(
         val activity = activity ?: return
         if (activity !is com.gse.securekiosk.MainActivity) return
         
-        try {
-            val intent = Intent(context, CameraScannerActivity::class.java)
-            activity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error opening camera scanner after permission granted", e)
-            val errorResult = JSONObject().apply {
-                put("success", false)
-                put("error", e.message ?: "Unknown error")
-            }.toString()
-            callJavaScriptCallback(callbackName, errorResult)
-            cameraScanCallbackName = null
+        // Run on UI thread to ensure activity is ready
+        activity.runOnUiThread {
+            try {
+                val intent = Intent(context, CameraScannerActivity::class.java)
+                activity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error opening camera scanner after permission granted", e)
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", e.message ?: "Failed to open camera: ${e.javaClass.simpleName}")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+                cameraScanCallbackName = null
+            }
         }
     }
     

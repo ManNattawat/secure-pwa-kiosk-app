@@ -51,20 +51,27 @@ class CameraScannerActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera_scanner)
         
-        previewView = findViewById(R.id.cameraPreview)
-        instructionText = findViewById(R.id.instructionText)
-        resultText = findViewById(R.id.resultText)
-        closeButton = findViewById(R.id.closeButton)
-        flashButton = findViewById(R.id.flashButton)
-        
-        setupButtons()
-        
-        if (checkCameraPermission()) {
-            startCamera()
-        } else {
-            requestCameraPermission()
+        try {
+            setContentView(R.layout.activity_camera_scanner)
+            
+            previewView = findViewById(R.id.cameraPreview)
+            instructionText = findViewById(R.id.instructionText)
+            resultText = findViewById(R.id.resultText)
+            closeButton = findViewById(R.id.closeButton)
+            flashButton = findViewById(R.id.flashButton)
+            
+            setupButtons()
+            
+            if (checkCameraPermission()) {
+                startCamera()
+            } else {
+                requestCameraPermission()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onCreate", e)
+            Toast.makeText(this, "Error starting camera scanner: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
     
@@ -125,30 +132,40 @@ class CameraScannerActivity : AppCompatActivity() {
     }
     
     private fun bindCameraUseCases() {
-        val cameraProvider = cameraProvider ?: return
-        
-        // Preview
-        val preview = Preview.Builder()
-            .build()
-            .also {
-                it.setSurfaceProvider(previewView.surfaceProvider)
-            }
-        
-        // Image Analysis for barcode scanning
-        imageAnalyzer = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-            .build()
-            .also {
-                it.setAnalyzer(Executors.newSingleThreadExecutor(), BarcodeAnalyzer { barcodes ->
-                    handleBarcodeResult(barcodes)
-                })
-            }
-        
-        // Select camera (back camera preferred)
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+        val cameraProvider = this.cameraProvider ?: run {
+            Log.e(TAG, "Camera provider is null")
+            Toast.makeText(this, "Camera provider unavailable", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
         
         try {
+            // Preview
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+            
+            // Image Analysis for barcode scanning
+            imageAnalyzer = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .build()
+                .also {
+                    it.setAnalyzer(Executors.newSingleThreadExecutor(), BarcodeAnalyzer { barcodes ->
+                        handleBarcodeResult(barcodes)
+                    })
+                }
+            
+            // Select camera (back camera preferred, fallback to front if unavailable)
+            val cameraSelector = try {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            } catch (e: Exception) {
+                Log.w(TAG, "Back camera unavailable, using front camera", e)
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            }
+            
             // Unbind use cases before rebinding
             cameraProvider.unbindAll()
             
