@@ -161,6 +161,109 @@ class SupabaseClient(private val context: Context) {
         return uri.host ?: ""
     }
 
+    /**
+     * Insert data to Supabase table
+     */
+    suspend fun insertData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
+        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val baseUrl = DeviceConfig.getSupabaseUrl(context)
+        val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName"
+        
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("apikey", apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Prefer", "return=minimal")
+            .post(data.toString().toRequestBody(JSON_TYPE))
+            .build()
+        
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Insert error: ${response.code} ${response.message}")
+                }
+                response.isSuccessful
+            }
+        } catch (ex: IOException) {
+            Log.e(TAG, "Network error during insert", ex)
+            false
+        }
+    }
+    
+    /**
+     * Update data in Supabase table
+     */
+    suspend fun updateData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
+        // Extract ID from data (assuming primary key is "id")
+        val id = data.optString("id", null)
+        if (id.isNullOrBlank()) {
+            Log.e(TAG, "Update failed: no ID in data")
+            return@withContext false
+        }
+        
+        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val baseUrl = DeviceConfig.getSupabaseUrl(context)
+        val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName?id=eq.$id"
+        
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("apikey", apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Prefer", "return=minimal")
+            .patch(data.toString().toRequestBody(JSON_TYPE))
+            .build()
+        
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Update error: ${response.code} ${response.message}")
+                }
+                response.isSuccessful
+            }
+        } catch (ex: IOException) {
+            Log.e(TAG, "Network error during update", ex)
+            false
+        }
+    }
+    
+    /**
+     * Delete data from Supabase table
+     */
+    suspend fun deleteData(tableName: String, data: org.json.JSONObject): Boolean = withContext(Dispatchers.IO) {
+        // Extract ID from data (assuming primary key is "id")
+        val id = data.optString("id", null)
+        if (id.isNullOrBlank()) {
+            Log.e(TAG, "Delete failed: no ID in data")
+            return@withContext false
+        }
+        
+        val apiKey = DeviceConfig.getSupabaseApiKey(context)
+        val baseUrl = DeviceConfig.getSupabaseUrl(context)
+        val url = "${baseUrl.trimEnd('/')}/rest/v1/$tableName?id=eq.$id"
+        
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("apikey", apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .addHeader("Prefer", "return=minimal")
+            .delete()
+            .build()
+        
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Delete error: ${response.code} ${response.message}")
+                }
+                response.isSuccessful
+            }
+        } catch (ex: IOException) {
+            Log.e(TAG, "Network error during delete", ex)
+            false
+        }
+    }
+    
     companion object {
         private const val TAG = "SupabaseClient"
         private val JSON_TYPE = "application/json; charset=utf-8".toMediaType()

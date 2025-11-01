@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -63,10 +64,24 @@ dependencies {
     // ML Kit Barcode Scanner
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
     
+    // ML Kit Text Recognition (OCR)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    implementation("com.google.mlkit:text-recognition-thai:16.0.1") // สำหรับภาษาไทย
+    
     // CameraX for camera access
     val cameraxVersion = "1.3.1"
     implementation("androidx.camera:camera-core:${cameraxVersion}")
     implementation("androidx.camera:camera-camera2:${cameraxVersion}")
     implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
     implementation("androidx.camera:camera-view:${cameraxVersion}")
+    
+    // Room Database for offline support
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:${roomVersion}")
+    implementation("androidx.room:room-ktx:${roomVersion}")
+    kapt("androidx.room:room-compiler:${roomVersion}")
+    
+    // WorkManager for background tasks
+    val workVersion = "2.9.0"
+    implementation("androidx.work:work-runtime-ktx:${workVersion}")
 }

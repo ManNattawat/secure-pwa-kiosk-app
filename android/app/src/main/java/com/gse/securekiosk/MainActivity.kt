@@ -151,6 +151,11 @@ class MainActivity : Activity() {
         if (requestCode == CameraScannerActivity.REQUEST_CODE) {
             androidBridge.handleCameraScanResult(resultCode, data)
         }
+        
+        // Handle document scanner result
+        if (requestCode == com.gse.securekiosk.ocr.DocumentScannerActivity.REQUEST_CODE) {
+            androidBridge.handleDocumentScanResult(resultCode, data)
+        }
     }
 
     private fun startLocationService() {

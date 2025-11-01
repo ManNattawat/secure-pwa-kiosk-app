@@ -12,6 +12,10 @@ import com.gse.securekiosk.location.LocationHistoryTracker
 import com.gse.securekiosk.remote.RemoteControlManager
 import com.gse.securekiosk.scanner.BarcodeScannerService
 import com.gse.securekiosk.scanner.CameraScannerActivity
+import com.gse.securekiosk.ocr.DocumentScannerActivity
+import com.gse.securekiosk.ocr.OcrService
+import com.gse.securekiosk.offline.OfflineDataManager
+import com.gse.securekiosk.sync.SyncManager
 import com.gse.securekiosk.util.DeviceConfig
 import com.google.mlkit.vision.common.InputImage
 import org.json.JSONArray
@@ -28,6 +32,7 @@ class AndroidBridge(
 ) {
     private val TAG = "AndroidBridge"
     private var cameraScanCallbackName: String? = null
+    private var documentScanCallbackName: String? = null
 
     /**
      * Lock Device (ล็อกเครื่อง)
@@ -410,6 +415,259 @@ class AndroidBridge(
                 put("error", "Scan cancelled or failed")
             }.toString()
             callJavaScriptCallback(callbackName, errorResult)
+        }
+    }
+    
+    /**
+     * Open Document Scanner (เปิดกล้องสแกนเอกสารด้วย OCR)
+     * @param callbackName JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun openDocumentScanner(callbackName: String) {
+        try {
+            if (activity == null || activity !is com.gse.securekiosk.MainActivity) {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "Activity not available")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+                return
+            }
+            
+            val mainActivity = activity as com.gse.securekiosk.MainActivity
+            
+            // Check camera permission
+            val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.CAMERA
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            
+            if (!hasPermission) {
+                // Request permission first
+                documentScanCallbackName = callbackName
+                mainActivity.requestCameraPermission()
+                return
+            }
+            
+            // Store callback name for result
+            documentScanCallbackName = callbackName
+            
+            // Open document scanner activity
+            mainActivity.runOnUiThread {
+                try {
+                    val intent = Intent(context, DocumentScannerActivity::class.java)
+                    mainActivity.startActivityForResult(intent, DocumentScannerActivity.REQUEST_CODE)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error launching document scanner activity", e)
+                    val errorResult = JSONObject().apply {
+                        put("success", false)
+                        put("error", e.message ?: "Failed to open document scanner")
+                    }.toString()
+                    callJavaScriptCallback(callbackName, errorResult)
+                    documentScanCallbackName = null
+                }
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening document scanner", e)
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+            documentScanCallbackName = null
+        }
+    }
+    
+    /**
+     * Extract text from image (OCR) - ใช้กับรูปที่มีอยู่แล้ว
+     * @param base64Image Base64 encoded image
+     * @param callbackName JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun extractTextFromImage(base64Image: String, callbackName: String) {
+        try {
+            // Decode base64 to bitmap
+            val base64Data = if (base64Image.contains(",")) {
+                base64Image.substringAfter(",")
+            } else {
+                base64Image
+            }
+            
+            val imageBytes = Base64.decode(base64Data, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            
+            if (bitmap == null) {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "Failed to decode image")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+                return
+            }
+            
+            // Process with OCR
+            val inputImage = InputImage.fromBitmap(bitmap, 0)
+            
+            OcrService.extractText(
+                image = inputImage,
+                onSuccess = { ocrResult ->
+                    val result = JSONObject().apply {
+                        put("success", true)
+                        put("data", JSONObject(ocrResult.toJson()))
+                    }.toString()
+                    callJavaScriptCallback(callbackName, result)
+                },
+                onError = { e ->
+                    Log.e(TAG, "OCR error", e)
+                    val errorResult = JSONObject().apply {
+                        put("success", false)
+                        put("error", e.message ?: "OCR processing failed")
+                    }.toString()
+                    callJavaScriptCallback(callbackName, errorResult)
+                }
+            )
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error extracting text from image", e)
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+        }
+    }
+    
+    /**
+     * Handle document scanner result
+     */
+    fun handleDocumentScanResult(resultCode: Int, data: android.content.Intent?) {
+        val callbackName = documentScanCallbackName ?: return
+        documentScanCallbackName = null
+        
+        if (resultCode == android.app.Activity.RESULT_OK && data != null) {
+            val ocrResultJson = data.getStringExtra(DocumentScannerActivity.EXTRA_OCR_RESULT)
+            val imageBase64 = data.getStringExtra(DocumentScannerActivity.EXTRA_IMAGE_BASE64)
+            
+            if (ocrResultJson != null) {
+                val result = JSONObject().apply {
+                    put("success", true)
+                    put("ocrResult", JSONObject(ocrResultJson))
+                    if (imageBase64 != null) {
+                        put("imageBase64", imageBase64)
+                    }
+                }.toString()
+                callJavaScriptCallback(callbackName, result)
+            } else {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "No OCR result")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+            }
+        } else {
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", "Scan cancelled")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+        }
+    }
+    
+    /**
+     * Save data for offline sync
+     * @param tableName Table name in Supabase
+     * @param operation "INSERT", "UPDATE", "DELETE"
+     * @param dataJson JSON string of data to sync
+     * @return JSON string with result
+     */
+    @JavascriptInterface
+    fun saveOfflineData(tableName: String, operation: String, dataJson: String): String {
+        return try {
+            val data = JSONObject(dataJson)
+            val manager = OfflineDataManager(context)
+            
+            // Use coroutine scope to run suspend function
+            kotlinx.coroutines.runBlocking {
+                val id = manager.saveOfflineData(tableName, operation, data)
+                JSONObject().apply {
+                    put("success", true)
+                    put("id", id)
+                    put("message", "Data saved for offline sync")
+                }.toString()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving offline data", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+        }
+    }
+    
+    /**
+     * Get count of pending sync items
+     */
+    @JavascriptInterface
+    fun getPendingSyncCount(): String {
+        return try {
+            val manager = OfflineDataManager(context)
+            val count = kotlinx.coroutines.runBlocking {
+                manager.countPendingItems()
+            }
+            JSONObject().apply {
+                put("success", true)
+                put("count", count)
+            }.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting pending sync count", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+                put("count", 0)
+            }.toString()
+        }
+    }
+    
+    /**
+     * Trigger immediate sync
+     */
+    @JavascriptInterface
+    fun triggerSync(): String {
+        return try {
+            val syncManager = SyncManager(context)
+            syncManager.triggerSyncNow()
+            JSONObject().apply {
+                put("success", true)
+                put("message", "Sync triggered")
+            }.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error triggering sync", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+        }
+    }
+    
+    /**
+     * Start periodic sync
+     */
+    @JavascriptInterface
+    fun startPeriodicSync(): String {
+        return try {
+            val syncManager = SyncManager(context)
+            syncManager.startPeriodicSync()
+            JSONObject().apply {
+                put("success", true)
+                put("message", "Periodic sync started")
+            }.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting periodic sync", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
         }
     }
     
