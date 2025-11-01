@@ -150,12 +150,22 @@ class MainActivity : Activity() {
         // Handle camera scanner result
         if (requestCode == CameraScannerActivity.REQUEST_CODE) {
             androidBridge.handleCameraScanResult(resultCode, data)
+            // Ensure WebView is visible and focused after scanner closes
+            webView.requestFocus()
         }
         
         // Handle document scanner result
         if (requestCode == com.gse.securekiosk.ocr.DocumentScannerActivity.REQUEST_CODE) {
             androidBridge.handleDocumentScanResult(resultCode, data)
+            // Ensure WebView is visible and focused after scanner closes
+            webView.requestFocus()
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Ensure WebView is visible when activity resumes (after scanner closes)
+        webView.requestFocus()
     }
 
     private fun startLocationService() {

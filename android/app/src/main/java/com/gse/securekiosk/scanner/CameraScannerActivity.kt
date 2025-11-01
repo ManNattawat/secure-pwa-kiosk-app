@@ -144,16 +144,23 @@ class CameraScannerActivity : AppCompatActivity() {
         // Stop camera first to release resources immediately
         stopCamera()
         
-        // Set result
-        setResult(RESULT_CANCELED)
+        // Set result as canceled
+        setResult(RESULT_CANCELED, null)
         
-        // Force finish - ensure activity closes
-        if (!isFinishing) {
+        // Force finish immediately - don't wait
+        try {
             finish()
-            // Force close if still not finishing
-            if (!isFinishing) {
-                Log.w(TAG, "Activity not finishing, forcing finish")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error finishing activity", e)
+        }
+        
+        // Ensure activity is destroyed
+        if (!isFinishing) {
+            Log.w(TAG, "Activity not finishing, forcing finishAffinity")
+            try {
                 finishAffinity()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error finishing affinity", e)
             }
         }
     }
