@@ -11,6 +11,7 @@ import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -58,6 +59,14 @@ class CameraScannerActivity : AppCompatActivity() {
         
         // Setup fullscreen (supplement theme settings for Android 11+)
         setupFullscreen()
+        
+        // Handle back button (Android 13+)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Log.d(TAG, "OnBackPressedDispatcher: Back pressed")
+                cancelScan()
+            }
+        })
         
         try {
             setContentView(R.layout.activity_camera_scanner)
