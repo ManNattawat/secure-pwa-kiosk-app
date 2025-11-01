@@ -141,15 +141,20 @@ class CameraScannerActivity : AppCompatActivity() {
     private fun cancelScan() {
         Log.d(TAG, "Cancelling scan")
         
-        // Stop camera first to release resources
+        // Stop camera first to release resources immediately
         stopCamera()
         
-        // Set result and finish
+        // Set result
         setResult(RESULT_CANCELED)
         
-        // Finish on UI thread to ensure proper lifecycle
-        runOnUiThread {
+        // Force finish - ensure activity closes
+        if (!isFinishing) {
             finish()
+            // Force close if still not finishing
+            if (!isFinishing) {
+                Log.w(TAG, "Activity not finishing, forcing finish")
+                finishAffinity()
+            }
         }
     }
     
@@ -158,9 +163,30 @@ class CameraScannerActivity : AppCompatActivity() {
      */
     private fun stopCamera() {
         try {
-            imageAnalyzer?.clearAnalyzer()
-            cameraProvider?.unbindAll()
+            // Clear analyzer first
+            imageAnalyzer?.let {
+                try {
+                    it.clearAnalyzer()
+                    Log.d(TAG, "Image analyzer cleared")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error clearing analyzer", e)
+                }
+            }
+            
+            // Unbind all camera use cases
+            cameraProvider?.let {
+                try {
+                    it.unbindAll()
+                    Log.d(TAG, "Camera provider unbound")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error unbinding camera provider", e)
+                }
+            }
+            
+            // Clear camera reference
             camera = null
+            imageAnalyzer = null
+            
             Log.d(TAG, "Camera stopped and resources released")
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping camera", e)
