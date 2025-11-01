@@ -33,7 +33,7 @@
             android:name="com.gse.securekiosk.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="sensorLandscape"
+            android:screenOrientation="sensor"
             android:showOnLockScreen="true"
             android:turnScreenOn="true">
             <intent-filter>

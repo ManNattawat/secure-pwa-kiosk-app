@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -179,6 +180,96 @@ class MainActivity : Activity() {
             } else {
                 view?.context?.startActivity(Intent(Intent.ACTION_VIEW, url))
                 true
+            }
+        }
+
+        override fun onReceivedError(
+            view: WebView?,
+            request: WebResourceRequest?,
+            error: android.webkit.WebResourceError?
+        ) {
+            super.onReceivedError(view, request, error)
+            
+            // Handle network errors
+            if (error != null && request != null) {
+                val errorCode = error.errorCode
+                val errorDescription = error.description?.toString() ?: ""
+                
+                // Generate HTML error page
+                val htmlError = """
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>ข้อผิดพลาด</title>
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', Arial, sans-serif;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                min-height: 100vh;
+                                margin: 0;
+                                background: #f5f5f5;
+                                color: #333;
+                            }
+                            .error-container {
+                                text-align: center;
+                                padding: 20px;
+                                max-width: 500px;
+                            }
+                            .error-icon {
+                                font-size: 64px;
+                                margin-bottom: 20px;
+                            }
+                            .error-title {
+                                font-size: 24px;
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                                color: #d32f2f;
+                            }
+                            .error-message {
+                                font-size: 16px;
+                                margin-bottom: 20px;
+                                color: #666;
+                            }
+                            .error-details {
+                                font-size: 14px;
+                                color: #999;
+                                margin-bottom: 20px;
+                            }
+                            .retry-button {
+                                background: #1976d2;
+                                color: white;
+                                border: none;
+                                padding: 12px 24px;
+                                font-size: 16px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                margin-top: 10px;
+                            }
+                            .retry-button:hover {
+                                background: #1565c0;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="error-container">
+                            <div class="error-icon">⚠️</div>
+                            <div class="error-title">ไม่สามารถโหลดหน้าเว็บ</div>
+                            <div class="error-message">กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</div>
+                            <div class="error-details">Error: ${errorCode} - ${errorDescription}</div>
+                            <button class="retry-button" onclick="window.location.reload()">ลองใหม่อีกครั้ง</button>
+                        </div>
+                    </body>
+                    </html>
+                """.trimIndent()
+                
+                // Load error page only for main frame
+                if (request.isForMainFrame) {
+                    view?.loadDataWithBaseURL(null, htmlError, "text/html", "UTF-8", null)
+                }
             }
         }
 
