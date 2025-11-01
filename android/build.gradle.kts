@@ -6,6 +6,7 @@ plugins {
 allprojects {
     configurations.all {
         exclude(group = "androidx.profileinstaller", module = "profileinstaller")
-        exclude(group = "androidx.arch.core", module = "core-runtime")
+        // Removed exclude for androidx.arch.core:core-runtime
+        // because androidx.lifecycle requires it
     }
 }
