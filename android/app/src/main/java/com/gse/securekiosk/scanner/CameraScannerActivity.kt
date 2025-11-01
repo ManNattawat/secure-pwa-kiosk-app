@@ -292,6 +292,7 @@ class CameraScannerActivity : AppCompatActivity() {
             
             // Auto close after short delay (ให้ผู้ใช้เห็นผลลัพธ์ก่อน)
             previewView.postDelayed({
+                setResult(RESULT_OK, result)
                 finish()
             }, 800)
         }
