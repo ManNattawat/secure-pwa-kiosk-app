@@ -51,12 +51,16 @@
     <!-- Close Button -->
     <ImageButton
         android:id="@+id/closeButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_margin="20dp"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Close"
+        android:background="@android:drawable/dialog_holo_dark_frame"
+        android:contentDescription="ปิดกล้อง"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="8dp"
+        android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#FFFFFF" />

@@ -110,13 +110,38 @@ class CameraScannerActivity : AppCompatActivity() {
     }
     
     private fun setupButtons() {
+        // Close button - ปุ่มปิดกล้อง
         closeButton.setOnClickListener {
-            finish()
+            Log.d(TAG, "Close button clicked")
+            cancelScan()
         }
+        
+        // Make close button more visible and clickable
+        closeButton.isClickable = true
+        closeButton.isFocusable = true
+        closeButton.elevation = 8f
         
         flashButton.setOnClickListener {
             toggleFlash()
         }
+    }
+    
+    /**
+     * Cancel scan and return to previous activity
+     */
+    private fun cancelScan() {
+        Log.d(TAG, "Cancelling scan")
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+    
+    /**
+     * Handle back button press
+     */
+    override fun onBackPressed() {
+        Log.d(TAG, "Back button pressed")
+        cancelScan()
+        super.onBackPressed()
     }
     
     private fun checkCameraPermission(): Boolean {
