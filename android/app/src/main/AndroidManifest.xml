@@ -53,6 +53,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.gse.securekiosk.scanner.CameraScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+
         <service
             android:name="com.gse.securekiosk.location.LocationSyncService"
             android:enabled="true"

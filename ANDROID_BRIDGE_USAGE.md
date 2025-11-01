@@ -103,7 +103,33 @@ if (window.AndroidBridge) {
 
 ### **C. Barcode Scanner**
 
-#### 7. **Scan Barcode from Image (สแกนบาร์โค้ดจากรูปภาพ)**
+#### 7. **Open Camera Scanner (เปิดกล้องสแกนบาร์โค้ดแบบ real-time)** ⭐ แนะนำ
+```typescript
+if (window.AndroidBridge) {
+    // กำหนด callback function
+    window.onCameraScanResult = function(resultJson) {
+        const result = JSON.parse(resultJson);
+        if (result.success) {
+            const barcodeValue = result.barcodeValue;
+            const barcodeData = result.barcodeData;
+            
+            console.log('Barcode found:', barcodeValue);
+            console.log('Format:', barcodeData.formatName);
+            console.log('Type:', barcodeData.typeName);
+            
+            // ใช้ barcodeValue ต่อได้เลย
+            // เช่น: updateProduct(barcodeValue)
+        } else {
+            console.error('Scan failed:', result.error);
+        }
+    };
+    
+    // เปิดกล้องสแกน (แบบ real-time - สแกนจากข้างกล่องได้เลย)
+    window.AndroidBridge.openCameraScanner('onCameraScanResult');
+}
+```
+
+#### 8. **Scan Barcode from Image (สแกนบาร์โค้ดจากรูปภาพ)**
 ```typescript
 if (window.AndroidBridge) {
     // รับ image จาก camera หรือ file input
@@ -255,6 +281,36 @@ class AndroidBridgeService {
         return result.success ? result.data : null;
     }
 
+    async openCameraScanner(): Promise<BarcodeResult | null> {
+        if (!this.bridge) throw new Error('Android Bridge not available');
+        
+        return new Promise((resolve, reject) => {
+            const callbackName = `onCameraScan_${Date.now()}`;
+            
+            (window as any)[callbackName] = (resultJson: string) => {
+                try {
+                    const result = JSON.parse(resultJson);
+                    if (result.success) {
+                        resolve(result.barcodeData);
+                    } else {
+                        if (result.error === 'Scan cancelled or failed') {
+                            resolve(null); // User cancelled
+                        } else {
+                            reject(new Error(result.error || 'Scan failed'));
+                        }
+                    }
+                } catch (e) {
+                    reject(e);
+                } finally {
+                    // Cleanup callback
+                    delete (window as any)[callbackName];
+                }
+            };
+            
+            this.bridge!.openCameraScanner(callbackName);
+        });
+    }
+
     async scanBarcodeFromImage(base64Image: string): Promise<BarcodeResult[]> {
         if (!this.bridge) throw new Error('Android Bridge not available');
         
@@ -328,7 +384,7 @@ if (useNativeScanner) {
 - ✅ Last Location
 - ✅ Device ID
 - ✅ Barcode Scanner (from image)
-- ⏳ Real-time Camera Scanner (Phase 2)
+- ✅ **Real-time Camera Scanner** (Phase 2) - สแกนจากกล้องโดยตรง ✨
 
 ---
 

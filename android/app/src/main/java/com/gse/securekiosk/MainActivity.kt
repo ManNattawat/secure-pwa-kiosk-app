@@ -26,12 +26,14 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.gse.securekiosk.bridge.AndroidBridge
 import com.gse.securekiosk.kiosk.KioskManager
 import com.gse.securekiosk.location.LocationSyncService
+import com.gse.securekiosk.scanner.CameraScannerActivity
 import com.gse.securekiosk.util.DeviceConfig
 
 class MainActivity : Activity() {
 
     private lateinit var webView: WebView
     private lateinit var kioskManager: KioskManager
+    private lateinit var androidBridge: AndroidBridge
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
@@ -61,7 +63,8 @@ class MainActivity : Activity() {
         configureWebView(webView)
         
         // Add JavaScript Interface Bridge
-        webView.addJavascriptInterface(AndroidBridge(this, webView), "AndroidBridge")
+        androidBridge = AndroidBridge(this, webView, this)
+        webView.addJavascriptInterface(androidBridge, "AndroidBridge")
         
         webView.loadUrl(DeviceConfig.getPwaUrl(this))
 
@@ -133,6 +136,15 @@ class MainActivity : Activity() {
                     webView.evaluateJavascript("if(window.onCameraPermissionDenied) window.onCameraPermissionDenied();", null)
                 }
             }
+        }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        // Handle camera scanner result
+        if (requestCode == CameraScannerActivity.REQUEST_CODE) {
+            androidBridge.handleCameraScanResult(resultCode, data)
         }
     }
 

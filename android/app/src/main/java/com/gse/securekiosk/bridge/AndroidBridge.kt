@@ -1,6 +1,8 @@
 package com.gse.securekiosk.bridge
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -9,6 +11,7 @@ import android.webkit.JavascriptInterface
 import com.gse.securekiosk.location.LocationHistoryTracker
 import com.gse.securekiosk.remote.RemoteControlManager
 import com.gse.securekiosk.scanner.BarcodeScannerService
+import com.gse.securekiosk.scanner.CameraScannerActivity
 import com.gse.securekiosk.util.DeviceConfig
 import com.google.mlkit.vision.common.InputImage
 import org.json.JSONArray
@@ -20,9 +23,11 @@ import org.json.JSONObject
  */
 class AndroidBridge(
     private val context: Context,
-    private val webView: android.webkit.WebView?
+    private val webView: android.webkit.WebView?,
+    private val activity: Activity?
 ) {
     private val TAG = "AndroidBridge"
+    private var cameraScanCallbackName: String? = null
 
     /**
      * Lock Device (ล็อกเครื่อง)
@@ -266,6 +271,89 @@ class AndroidBridge(
             val errorResult = JSONObject().apply {
                 put("success", false)
                 put("error", e.message ?: "Unknown error")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+        }
+    }
+
+    /**
+     * Open Camera Scanner (เปิดกล้องสแกนบาร์โค้ดแบบ real-time)
+     * @param callbackName JavaScript callback function name
+     */
+    @JavascriptInterface
+    fun openCameraScanner(callbackName: String) {
+        try {
+            if (activity == null) {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "Activity not available")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+                return
+            }
+            
+            // Check camera permission
+            val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.CAMERA
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            
+            if (!hasPermission) {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "Camera permission required")
+                    put("requiresPermission", true)
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+                return
+            }
+            
+            // Store callback name for result
+            cameraScanCallbackName = callbackName
+            
+            // Open camera scanner activity
+            val intent = Intent(context, CameraScannerActivity::class.java)
+            activity.startActivityForResult(intent, CameraScannerActivity.REQUEST_CODE)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening camera scanner", e)
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+            callJavaScriptCallback(callbackName, errorResult)
+        }
+    }
+    
+    /**
+     * Handle camera scan result (เรียกจาก MainActivity)
+     */
+    fun handleCameraScanResult(resultCode: Int, data: Intent?) {
+        val callbackName = cameraScanCallbackName ?: return
+        cameraScanCallbackName = null
+        
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            val barcodeValue = data.getStringExtra(CameraScannerActivity.EXTRA_BARCODE_VALUE)
+            val barcodeJson = data.getStringExtra(CameraScannerActivity.EXTRA_RESULT)
+            
+            if (barcodeValue != null && barcodeJson != null) {
+                val result = JSONObject().apply {
+                    put("success", true)
+                    put("barcodeValue", barcodeValue)
+                    put("barcodeData", JSONObject(barcodeJson))
+                }.toString()
+                callJavaScriptCallback(callbackName, result)
+            } else {
+                val errorResult = JSONObject().apply {
+                    put("success", false)
+                    put("error", "No barcode found")
+                }.toString()
+                callJavaScriptCallback(callbackName, errorResult)
+            }
+        } else {
+            val errorResult = JSONObject().apply {
+                put("success", false)
+                put("error", "Scan cancelled or failed")
             }.toString()
             callJavaScriptCallback(callbackName, errorResult)
         }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Semi-transparent overlay -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#80000000" />
+        </shape>
+    </item>
+    <!-- Transparent center (scanning area) -->
+    <item
+        android:left="40dp"
+        android:right="40dp"
+        android:top="120dp"
+        android:bottom="120dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+            <stroke
+                android:width="3dp"
+                android:color="#4CAF50"
+                android:dashWidth="10dp"
+                android:dashGap="5dp" />
+        </shape>
+    </item>
+</layer-list>
+
