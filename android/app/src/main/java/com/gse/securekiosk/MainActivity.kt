@@ -79,6 +79,8 @@ class MainActivity : Activity() {
         super.onResume()
         kioskManager.ensureLockTaskMode()
         enterImmersiveMode()
+        // Ensure WebView is visible when activity resumes (after scanner closes)
+        webView.requestFocus()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -160,12 +162,6 @@ class MainActivity : Activity() {
             // Ensure WebView is visible and focused after scanner closes
             webView.requestFocus()
         }
-    }
-    
-    override fun onResume() {
-        super.onResume()
-        // Ensure WebView is visible when activity resumes (after scanner closes)
-        webView.requestFocus()
     }
 
     private fun startLocationService() {

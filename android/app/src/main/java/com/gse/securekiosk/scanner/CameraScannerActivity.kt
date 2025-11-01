@@ -19,8 +19,6 @@ import androidx.camera.core.*
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.camera.view.MeteringPointFactory
-import androidx.camera.core.CameraSelector
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.gse.securekiosk.R
@@ -267,30 +265,22 @@ class CameraScannerActivity : AppCompatActivity() {
         }
         
         try {
-            // Configure high resolution for better barcode scanning
-            // Prefer 1080p (Full HD) - optimal balance between quality and performance
-            val resolutionSelector = ResolutionSelector.Builder()
-                .setResolutionStrategy(
-                    ResolutionStrategy(
-                        android.util.Size(1920, 1080), // Target 1080p
-                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
-                    )
-                )
-                .build()
-            
-            // Preview - Use high quality for better barcode detection
+            // Preview - CameraX will use best available resolution automatically
+            // For barcode scanning, default resolution is usually sufficient (720p-1080p)
             val preview = Preview.Builder()
-                .setResolutionSelector(resolutionSelector)
                 .build()
                 .also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
             
-            // Image Analysis for barcode scanning - Use highest quality
+            // Image Analysis for barcode scanning
+            // Use STRATEGY_KEEP_ONLY_LATEST for performance
+            // CameraX will automatically select optimal resolution (usually 720p-1080p)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-                .setResolutionSelector(resolutionSelector) // Use same resolution for analysis
+                // Note: CameraX 1.3.1 automatically selects best resolution for barcode scanning
+                // Usually 720p-1080p depending on device capabilities
                 .build()
                 .also {
                     it.setAnalyzer(Executors.newSingleThreadExecutor(), BarcodeAnalyzer { barcodes ->
