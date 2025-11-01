@@ -1,9 +1,11 @@
 package com.gse.securekiosk
 
 import android.app.Activity
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +16,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -25,6 +29,15 @@ class MainActivity : Activity() {
 
     private lateinit var webView: WebView
     private lateinit var kioskManager: KioskManager
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.FOREGROUND_SERVICE_LOCATION
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +54,8 @@ class MainActivity : Activity() {
         configureWebView(webView)
         webView.loadUrl(DeviceConfig.getPwaUrl(this))
 
-        startLocationService()
+        // Request permissions before starting location service
+        requestLocationPermissions()
     }
 
     override fun onResume() {
@@ -57,9 +71,52 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun requestLocationPermissions() {
+        val missingPermissions = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missingPermissions.isEmpty()) {
+            // All permissions granted, start service
+            startLocationService()
+        } else {
+            // Request missing permissions
+            ActivityCompat.requestPermissions(
+                this,
+                missingPermissions.toTypedArray(),
+                PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            if (allGranted) {
+                startLocationService()
+            }
+            // If permissions denied, service won't start (handled by service itself)
+        }
+    }
+
     private fun startLocationService() {
-        val intent = Intent(this, LocationSyncService::class.java)
-        startForegroundService(intent)
+        try {
+            val intent = Intent(this, LocationSyncService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                @Suppress("DEPRECATION")
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            // Ignore if service can't start (Android 15 restrictions)
+            // Service will be started later when conditions are met
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
