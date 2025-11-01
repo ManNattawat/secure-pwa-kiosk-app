@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.GlobalScope
 import com.gse.securekiosk.MainActivity
 import com.gse.securekiosk.R
+import com.gse.securekiosk.location.LocationHistoryTracker
 import com.gse.securekiosk.supabase.SupabaseClient
 import com.gse.securekiosk.util.DeviceConfig
 import com.google.android.gms.location.*
@@ -95,6 +96,10 @@ class LocationSyncService : Service() {
 
     private fun sendLocation(location: Location) {
         val deviceId = DeviceConfig.getDeviceId(this)
+        
+        // บันทึกประวัติการเดินทาง (ใช้สำหรับดูเส้นทาง)
+        LocationHistoryTracker.recordLocation(this, location)
+        
         GlobalScope.launch {
             SupabaseClient(this@LocationSyncService).sendLocation(
                 deviceId = deviceId,

@@ -72,6 +72,34 @@ class SupabaseClient(private val context: Context) {
         post(DeviceConfig.getStatusEndpoint(context), payload)
     }
 
+    suspend fun sendLocationHistory(
+        deviceId: String,
+        latitude: Double,
+        longitude: Double,
+        accuracy: Double,
+        bearing: Double,
+        speed: Double,
+        recordedAt: Long,
+        provider: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        val payload = """
+            {
+              "payload": {
+                "device_id": "$deviceId",
+                "latitude": $latitude,
+                "longitude": $longitude,
+                "accuracy": $accuracy,
+                "bearing": $bearing,
+                "speed": $speed,
+                "recorded_at": "${java.time.Instant.ofEpochMilli(recordedAt)}",
+                "provider": "$provider"
+              }
+            }
+        """.trimIndent()
+
+        post(DeviceConfig.getLocationEndpoint(context), payload)
+    }
+
     private fun post(endpoint: String, jsonBody: String): Boolean {
         val apiKey = DeviceConfig.getSupabaseApiKey(context)
         if (apiKey.isNullOrBlank()) {

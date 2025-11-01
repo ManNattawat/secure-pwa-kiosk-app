@@ -267,14 +267,26 @@ manager.setStorageEncryption(adminComponent, true)
 **โค้ดที่ใช้:**
 ```kotlin
 // ลบข้อมูลทั้งหมด (Factory Reset)
-manager.wipeData(0)
+RemoteControlManager.wipeDevice(context, 0)
 
 // ล็อกเครื่องทันที
-manager.lockNow()
+RemoteControlManager.lockDevice(context)
 
-// Reboot (ต้องใช้ ADB หรือ root)
-// manager.reboot(adminComponent)
+// รีสตาร์ทเครื่อง (Android N+ และต้องเป็น Device Owner)
+RemoteControlManager.rebootDevice(context)
+
+// ตั้งค่ารหัสผ่านใหม่
+RemoteControlManager.resetPassword(context, "newPassword123")
+
+// ตั้งค่าจำนวนครั้งที่รหัสผ่านผิดสูงสุดก่อนลบข้อมูล
+RemoteControlManager.setMaximumFailedPasswordsForWipe(context, 5)
+
+// ดึงสถานะเครื่อง
+val status = RemoteControlManager.getDeviceStatus(context)
 ```
+
+**ไฟล์ที่เกี่ยวข้อง:**
+- `RemoteControlManager.kt` - จัดการ Remote Control ทั้งหมด
 
 ---
 
