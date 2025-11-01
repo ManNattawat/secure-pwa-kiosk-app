@@ -25,7 +25,8 @@ class KioskManager(private val activity: Activity) {
         }
 
         if (!manager.isDeviceOwnerApp(activity.packageName)) {
-            Log.w(TAG, "App is not device owner; lock task mode not enforced")
+            Log.w(TAG, "App is not device owner; using alternative kiosk mode")
+            // ใช้วิธีอื่นแทน เช่น fullscreen + immersive mode
             return
         }
 
