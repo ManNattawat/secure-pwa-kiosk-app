@@ -15,12 +15,10 @@ android {
         versionName = "1.0.0"
     }
 
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "armeabi-v7a")
-            isUniversalApk = false
+    // Ensure all architectures from dependencies are included
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 
