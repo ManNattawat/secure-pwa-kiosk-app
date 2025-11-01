@@ -16,8 +16,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.camera.core.*
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.camera.view.MeteringPointFactory
+import androidx.camera.core.CameraSelector
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.gse.securekiosk.R
@@ -264,17 +267,30 @@ class CameraScannerActivity : AppCompatActivity() {
         }
         
         try {
-            // Preview
+            // Configure high resolution for better barcode scanning
+            // Prefer 1080p (Full HD) - optimal balance between quality and performance
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(
+                    ResolutionStrategy(
+                        android.util.Size(1920, 1080), // Target 1080p
+                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                    )
+                )
+                .build()
+            
+            // Preview - Use high quality for better barcode detection
             val preview = Preview.Builder()
+                .setResolutionSelector(resolutionSelector)
                 .build()
                 .also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
             
-            // Image Analysis for barcode scanning
+            // Image Analysis for barcode scanning - Use highest quality
             imageAnalyzer = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .setResolutionSelector(resolutionSelector) // Use same resolution for analysis
                 .build()
                 .also {
                     it.setAnalyzer(Executors.newSingleThreadExecutor(), BarcodeAnalyzer { barcodes ->
@@ -301,6 +317,9 @@ class CameraScannerActivity : AppCompatActivity() {
                 imageAnalyzer
             )
             
+            // Setup auto-focus for barcode scanning
+            setupAutoFocus()
+            
             // Setup flash toggle
             flashButton.visibility = if (camera?.cameraInfo?.hasFlashUnit() == true) {
                 View.VISIBLE
@@ -312,6 +331,33 @@ class CameraScannerActivity : AppCompatActivity() {
             Log.e(TAG, "Error binding camera use cases", e)
             Toast.makeText(this, "Error starting camera: ${e.message}", Toast.LENGTH_SHORT).show()
             finish()
+        }
+    }
+    
+    /**
+     * Setup auto-focus for better barcode scanning
+     * Trigger focus on center of screen (ROI for barcode scanning)
+     */
+    private fun setupAutoFocus() {
+        val cam = camera ?: return
+        val cameraControl = cam.cameraControl
+        
+        // Create focus metering point at center of screen (where barcode usually is)
+        // Use PreviewView's MeteringPointFactory for proper coordinate conversion
+        val factory = previewView.meteringPointFactory
+        val centerPoint = factory.createPoint(0.5f, 0.5f) // Center point (normalized coordinates)
+        
+        val focusMeteringAction = FocusMeteringAction.Builder(centerPoint)
+            .setAutoCancelDuration(2, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+        
+        // Start continuous auto-focus for barcode scanning
+        try {
+            cameraControl.startFocusAndMetering(focusMeteringAction)
+            Log.d(TAG, "Auto-focus enabled for barcode scanning")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to setup auto-focus", e)
+            // Continue without auto-focus if not supported
         }
     }
     
