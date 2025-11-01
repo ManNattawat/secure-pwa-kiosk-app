@@ -5,23 +5,17 @@ import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.google.mlkit.vision.text.thai.TextRecognitionThai
-import org.json.JSONObject
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * OCR Service
  * ใช้ ML Kit Text Recognition สำหรับอ่านข้อความจากรูปภาพ
+ * Unified model รองรับหลายภาษารวมถึงภาษาไทยและอังกฤษ
  */
 object OcrService {
     private const val TAG = "OcrService"
     
-    // Thai + Latin text recognizer (รองรับทั้งภาษาไทยและอังกฤษ)
-    private val thaiTextRecognizer = TextRecognitionThai.getClient()
-    
-    // Latin-only recognizer (fallback)
-    private val latinTextRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+    // Unified text recognizer (รองรับทั้งภาษาไทยและอังกฤษ)
+    private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     
     /**
      * Extract text from image
@@ -33,24 +27,15 @@ object OcrService {
         onSuccess: (OcrResult) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        // Try Thai + Latin first (รองรับภาษาไทย)
-        thaiTextRecognizer.process(image)
+        // Unified model supports Thai and Latin text
+        textRecognizer.process(image)
             .addOnSuccessListener { visionText ->
                 val result = processTextResult(visionText)
                 onSuccess(result)
             }
             .addOnFailureListener { e ->
-                Log.w(TAG, "Thai recognizer failed, trying Latin", e)
-                // Fallback to Latin-only
-                latinTextRecognizer.process(image)
-                    .addOnSuccessListener { visionText ->
-                        val result = processTextResult(visionText)
-                        onSuccess(result)
-                    }
-                    .addOnFailureListener { e2 ->
-                        Log.e(TAG, "Both recognizers failed", e2)
-                        onError(e2)
-                    }
+                Log.e(TAG, "Text recognition failed", e)
+                onError(e)
             }
     }
     
@@ -108,10 +93,9 @@ object OcrService {
      */
     fun cleanup() {
         try {
-            thaiTextRecognizer.close()
-            latinTextRecognizer.close()
+            textRecognizer.close()
         } catch (e: Exception) {
-            Log.e(TAG, "Error closing recognizers", e)
+            Log.e(TAG, "Error closing recognizer", e)
         }
     }
     

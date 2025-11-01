@@ -65,8 +65,8 @@ dependencies {
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
     
     // ML Kit Text Recognition (OCR)
+    // Unified model supports multiple languages including Thai
     implementation("com.google.mlkit:text-recognition:16.0.1")
-    implementation("com.google.mlkit:text-recognition-thai:16.0.1") // สำหรับภาษาไทย
     
     // CameraX for camera access
     val cameraxVersion = "1.3.1"
