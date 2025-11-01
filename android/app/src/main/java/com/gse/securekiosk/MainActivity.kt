@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -73,6 +74,13 @@ class MainActivity : Activity() {
         if (hasFocus) {
             enterImmersiveMode()
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Activity won't be destroyed/recreated, just handle orientation change
+        // WebView will maintain its state and session
+        enterImmersiveMode()
     }
 
     private fun requestLocationPermissions() {

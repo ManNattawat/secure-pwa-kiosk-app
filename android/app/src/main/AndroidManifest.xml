@@ -34,6 +34,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="sensor"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:showOnLockScreen="true"
             android:turnScreenOn="true">
             <intent-filter>
