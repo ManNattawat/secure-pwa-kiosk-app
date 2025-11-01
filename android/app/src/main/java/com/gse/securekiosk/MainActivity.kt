@@ -54,8 +54,11 @@ class MainActivity : Activity() {
         configureWebView(webView)
         webView.loadUrl(DeviceConfig.getPwaUrl(this))
 
-        // Request permissions before starting location service
-        requestLocationPermissions()
+        // Delay permission request and service start to avoid Android 15 restrictions
+        // Android 15 doesn't allow starting foreground service immediately on app launch
+        webView.postDelayed({
+            requestLocationPermissions()
+        }, 1000) // Delay 1 second to allow activity to be fully visible
     }
 
     override fun onResume() {
