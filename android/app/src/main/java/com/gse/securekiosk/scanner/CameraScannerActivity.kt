@@ -131,17 +131,40 @@ class CameraScannerActivity : AppCompatActivity() {
      */
     private fun cancelScan() {
         Log.d(TAG, "Cancelling scan")
+        
+        // Stop camera first to release resources
+        stopCamera()
+        
+        // Set result and finish
         setResult(RESULT_CANCELED)
-        finish()
+        
+        // Finish on UI thread to ensure proper lifecycle
+        runOnUiThread {
+            finish()
+        }
+    }
+    
+    /**
+     * Stop camera and release resources
+     */
+    private fun stopCamera() {
+        try {
+            imageAnalyzer?.clearAnalyzer()
+            cameraProvider?.unbindAll()
+            camera = null
+            Log.d(TAG, "Camera stopped and resources released")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping camera", e)
+        }
     }
     
     /**
      * Handle back button press
      */
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         Log.d(TAG, "Back button pressed")
         cancelScan()
-        super.onBackPressed()
     }
     
     private fun checkCameraPermission(): Boolean {
@@ -298,10 +321,16 @@ class CameraScannerActivity : AppCompatActivity() {
         }
     }
     
+    override fun onPause() {
+        super.onPause()
+        // Stop camera when activity is paused
+        stopCamera()
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
-        cameraProvider?.unbindAll()
-        imageAnalyzer?.clearAnalyzer()
+        // Ensure cleanup
+        stopCamera()
     }
     
     /**
