@@ -309,6 +309,8 @@ class DocumentScannerActivity : AppCompatActivity() {
         }
         
         val inputImage = InputImage.fromBitmap(bitmap, 0)
+        val enhancedParsing = intent.getBooleanExtra("enhanced_parsing", false)
+        val documentType = intent.getStringExtra("document_type") ?: "generic"
         
         OcrService.extractText(
             image = inputImage,
@@ -318,9 +320,23 @@ class DocumentScannerActivity : AppCompatActivity() {
                 // Convert bitmap to base64
                 val base64Image = bitmapToBase64(bitmap)
                 
+                // Enhanced parsing for Thai ID Card
+                val finalResult = if (enhancedParsing && documentType == "thai_id_card") {
+                    val parsedData = ThaiIDCardParser.parse(ocrResult.fullText)
+                    Log.d(TAG, "Parsed ID Card: ${parsedData.toJson()}")
+                    
+                    // Combine OCR result with parsed data
+                    org.json.JSONObject(ocrResult.toJson()).apply {
+                        put("parsedData", org.json.JSONObject(parsedData.toJson()))
+                        put("documentType", "thai_id_card")
+                    }.toString()
+                } else {
+                    ocrResult.toJson()
+                }
+                
                 // Return result
                 val result = Intent().apply {
-                    putExtra(EXTRA_OCR_RESULT, ocrResult.toJson())
+                    putExtra(EXTRA_OCR_RESULT, finalResult)
                     putExtra(EXTRA_IMAGE_BASE64, base64Image)
                 }
                 setResult(RESULT_OK, result)

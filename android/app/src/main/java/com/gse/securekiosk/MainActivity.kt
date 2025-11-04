@@ -24,16 +24,23 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.gse.securekiosk.bridge.AndroidBridge
+import com.gse.securekiosk.bridge.OfflineVerificationBridge
+import com.gse.securekiosk.bridge.LocationTrackingBridge
+import com.gse.securekiosk.bridge.FileTransferBridge
 import com.gse.securekiosk.kiosk.KioskManager
 import com.gse.securekiosk.location.LocationSyncService
 import com.gse.securekiosk.scanner.CameraScannerActivity
 import com.gse.securekiosk.util.DeviceConfig
+import com.gse.securekiosk.worker.AutoSyncWorker
 
 class MainActivity : Activity() {
 
     private lateinit var webView: WebView
     private lateinit var kioskManager: KioskManager
     private lateinit var androidBridge: AndroidBridge
+    private lateinit var offlineVerificationBridge: OfflineVerificationBridge
+    private lateinit var locationTrackingBridge: LocationTrackingBridge
+    private lateinit var fileTransferBridge: FileTransferBridge
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
@@ -62,9 +69,21 @@ class MainActivity : Activity() {
         webView = findViewById(R.id.kioskWebView)
         configureWebView(webView)
         
-        // Add JavaScript Interface Bridge
+        // Add JavaScript Interface Bridges
         androidBridge = AndroidBridge(this, webView, this)
         webView.addJavascriptInterface(androidBridge, "AndroidBridge")
+        
+        offlineVerificationBridge = OfflineVerificationBridge(this)
+        webView.addJavascriptInterface(offlineVerificationBridge, "Android")
+        
+        locationTrackingBridge = LocationTrackingBridge(this)
+        webView.addJavascriptInterface(locationTrackingBridge, "AndroidLocation")
+        
+        fileTransferBridge = FileTransferBridge(this)
+        webView.addJavascriptInterface(fileTransferBridge, "AndroidFile")
+        
+        // Schedule Auto-Sync Worker
+        AutoSyncWorker.schedule(this)
         
         webView.loadUrl(DeviceConfig.getPwaUrl(this))
 

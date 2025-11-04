@@ -705,5 +705,67 @@ class AndroidBridge(
             webView.evaluateJavascript(jsCode, null)
         }
     }
+    
+    // ========================================
+    // OCR / DOCUMENT SCANNING METHODS
+    // ========================================
+    
+    /**
+     * Scan Thai ID Card (บัตรประชาชนไทย) with enhanced parsing
+     */
+    @JavascriptInterface
+    fun scanThaiIDCard(callbackName: String = ""): String {
+        return try {
+            if (callbackName.isNotEmpty()) {
+                documentScanCallbackName = callbackName
+            }
+            
+            activity?.runOnUiThread {
+                val intent = Intent(activity, com.gse.securekiosk.ocr.DocumentScannerActivity::class.java)
+                intent.putExtra("document_type", "thai_id_card")
+                intent.putExtra("enhanced_parsing", true)
+                activity?.startActivityForResult(intent, com.gse.securekiosk.ocr.DocumentScannerActivity.REQUEST_CODE)
+            }
+            
+            JSONObject().apply {
+                put("success", true)
+                put("message", "Thai ID card scanner opened")
+            }.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in scanThaiIDCard", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+        }
+    }
+    
+    /**
+     * Scan document with OCR
+     */
+    @JavascriptInterface
+    fun scanDocument(callbackName: String = ""): String {
+        return try {
+            if (callbackName.isNotEmpty()) {
+                documentScanCallbackName = callbackName
+            }
+            
+            activity?.runOnUiThread {
+                val intent = Intent(activity, com.gse.securekiosk.ocr.DocumentScannerActivity::class.java)
+                activity?.startActivityForResult(intent, com.gse.securekiosk.ocr.DocumentScannerActivity.REQUEST_CODE)
+            }
+            
+            JSONObject().apply {
+                put("success", true)
+                put("message", "Document scanner opened")
+            }.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in scanDocument", e)
+            JSONObject().apply {
+                put("success", false)
+                put("error", e.message ?: "Unknown error")
+            }.toString()
+        }
+    }
 }
 

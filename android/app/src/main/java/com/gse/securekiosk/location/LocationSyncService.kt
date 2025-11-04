@@ -18,8 +18,11 @@ import kotlinx.coroutines.GlobalScope
 import com.gse.securekiosk.MainActivity
 import com.gse.securekiosk.R
 import com.gse.securekiosk.location.LocationHistoryTracker
+import com.gse.securekiosk.location.LocationHistoryManager
+import com.gse.securekiosk.location.GeofencingManager
 import com.gse.securekiosk.supabase.SupabaseClient
 import com.gse.securekiosk.util.DeviceConfig
+import android.os.BatteryManager
 import com.google.android.gms.location.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -28,6 +31,14 @@ class LocationSyncService : Service() {
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private val locationHistoryManager: LocationHistoryManager by lazy {
+        LocationHistoryManager(this)
+    }
+
+    private val geofencingManager: GeofencingManager by lazy {
+        GeofencingManager(this)
     }
 
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
@@ -96,10 +107,31 @@ class LocationSyncService : Service() {
 
     private fun sendLocation(location: Location) {
         val deviceId = DeviceConfig.getDeviceId(this)
+        val employeeId = deviceId
+        
+        // Get battery level
+        val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         
         // บันทึกประวัติการเดินทาง (ใช้สำหรับดูเส้นทาง)
         LocationHistoryTracker.recordLocation(this, location)
         
+        // บันทึก Location History (SQLite)
+        locationHistoryManager.saveLocation(
+            employeeId = employeeId,
+            location = location,
+            activityType = "tracking",
+            batteryLevel = batteryLevel
+        )
+        
+        // ตรวจสอบ Geofencing
+        val geofenceEvents = geofencingManager.checkLocation(employeeId, location)
+        if (geofenceEvents.isNotEmpty()) {
+            android.util.Log.d("LocationSyncService", "Geofence events: ${geofenceEvents.size}")
+            // TODO: ส่ง events ไป PWA (via WebSocket or Broadcast)
+        }
+        
+        // Sync to Supabase
         GlobalScope.launch {
             SupabaseClient(this@LocationSyncService).sendLocation(
                 deviceId = deviceId,
